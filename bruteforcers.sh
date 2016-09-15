@@ -7,20 +7,35 @@ exec 2<&-
 exec 1>>"$LOG_FILE.log"
 exec 2>>"$LOG_FILE.err"
 
+function log {
+  MSG="$1" # message to be logged
+  LOG="$2" # stream to append the message to
+
+  # if LOG was not specified default to &1
+  if [ -z $STR ]; then 
+    LOG="&1"
+  fi 
+
+  # if a message was provided log it
+  if [ ! -z "$MSG" ]; then
+    eval "echo \"$(date -u +'%Y-%m-%d %H:%M:%S').$(date -u +%N | cut -c 1-3)   $MSG\" >$LOG"
+  fi
+}
+
 # ban function
 function banIP {
   IP="$1"
   ATTEMPTS="$2"
 
   # check that IP is defined
-  if [ -z ${IP+x} ]; then
-    echo "'$IP': ip not provided" >&2
+  if [ -z $IP ]; then
+    log "$IP: ip not provided" "&2"
     exit 1
   fi
 
   # check that ATTEMPTS is a number
   if [ ! "$ATTEMPTS" -eq "$ATTEMPTS" ]; then
-    echo "$(date -u +'%Y-%m-%d %H:%M:%S').$(date -u +%N | cut -c 1-3 )   '$IP': $ATTEMPTS is not a number" >&2
+    log "$IP: $ATTEMPTS is not a number" "&2"
   fi
 
   # firewall rule template
@@ -30,15 +45,15 @@ function banIP {
 
   # if the rule is already specified for the IP log the message and dont add anything
   if [ "$EXISTS" -gt "0" ]; then 
-    echo "$(date -u +'%Y-%m-%d %H:%M:%S').$(date -u +%N | cut -c 1-3 )   '$IP': already banned"
+    log "$IP: already banned"
   # otherwise add the rule and log the message
   else
-    echo "$(date -u +'%Y-%m-%d %H:%M:%S').$(date -u +%N | cut -c 1-3 )   '$IP': banning after $ATTEMPTS unsuccessfull login attempts"
+    log "$IP: banning after $ATTEMPTS unsuccessfull login attempts"
     firewall-cmd --permanent --add-rich-rule="$RULE" > /dev/null 2>&2
   fi
 }
 
-echo "$(date -u +'%Y-%m-%d %H:%M:%S').$(date -u +%N | cut -c 1-3 )   starting"
+log "starting"
 
 # parse all the unsuccessfull login attempts from ssh logs
 # if more then $LIMIT login attempts failed from the same IP ban it
@@ -55,4 +70,4 @@ done
 # reload the firewalld for the changes to take effect
 firewall-cmd --reload > /dev/null 2>&2
 
-echo "$(date -u +'%Y-%m-%d %H:%M:%S').$(date -u +%N | cut -c 1-3 )   finished"
+log "finished"
