@@ -12,9 +12,9 @@ function log {
   LOG="$2" # stream to append the message to
 
   # if LOG was not specified default to &1
-  if [ -z $STR ]; then 
+  if [ -z $STR ]; then
     LOG="&1"
-  fi 
+  fi
 
   # if a message was provided log it
   if [ ! -z "$MSG" ]; then
@@ -44,7 +44,7 @@ function banIP {
   EXISTS=$(firewall-cmd --list-rich-rules | grep "$RULE_FILTER" | wc -l)
 
   # if the rule is already specified for the IP log the message and dont add anything
-  if [ "$EXISTS" -gt "0" ]; then 
+  if [ "$EXISTS" -gt "0" ]; then
     log "$IP: already banned"
   # otherwise add the rule and log the message
   else
