@@ -40,6 +40,12 @@ function banIP {
 
 info  "starting"
 
+local limit="$1"
+
+if [ -z "$limit" ]; then
+  limit="5"
+fi
+
 # parse all the unsuccessfull login attempts from ssh logs
 # if more then $LIMIT login attempts failed from the same IP ban it
 for line in $(egrep "Invalid user.+from" /var/log/secure | egrep -o "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" | sort | uniq -c | sed "s/^[ ]*\([0-9]*\)[ ]*\(.*\)$/\1:\2/")
@@ -47,7 +53,7 @@ do
   cnt=$(echo "$line" | awk 'BEGIN { FS = ":"}; { RS = "\n" }; { print $1 }')
   ip=$(echo "$line" | awk 'BEGIN { FS = ":"}; { RS = "\n" }; { print $2 }')
 
-  if [ "$cnt" -gt "5" ]; then
+  if [ "$cnt" -gt "$limit" ]; then
     banIP $ip $cnt
     if [ "$?" -ne "0" ]; then
       error "error encountered while processing the ip address '$ip' with '$cnt' unsuccessfull login attempts"
