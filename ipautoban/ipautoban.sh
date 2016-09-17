@@ -40,7 +40,7 @@ function banIP {
 
 info  "starting"
 
-local limit="$1"
+limit="$1"
 
 if [ -z "$limit" ]; then
   limit="5"
