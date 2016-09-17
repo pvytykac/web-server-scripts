@@ -1,7 +1,8 @@
 # logs a message ($1) at a trace level ($2 - default info)
 # supported log levels:
-#   stdout -> TRACE,DEBUG,INFO,WARN
-#   stdere -> ERROR
+#   TRACE,DEBUG,INFO,WARN -> stdout
+#   ERROR                 -> stderr
+#   OTHER                 -> INFO
 function log {
   local msg="$1"                              # message to be logged
   local lvl="$2"                              # log level to log the message at
