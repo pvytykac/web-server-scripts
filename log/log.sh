@@ -32,7 +32,7 @@ function log {
   return $?
 }
 
-# convinience functions below
+# convenience functions below
 
 function trace {
   log "$1" "TRACE"
