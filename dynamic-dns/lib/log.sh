@@ -1,0 +1,1 @@
+/home/pvytykac/.scripts/log/log.sh
