@@ -48,7 +48,7 @@ fi
 
 # parse all the unsuccessfull login attempts from ssh logs
 # if more then $LIMIT login attempts failed from the same IP ban it
-for line in $(egrep "Invalid user.+from" /var/log/secure | egrep -o "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" | sort | uniq -c | sed "s/^[ ]*\([0-9]*\)[ ]*\(.*\)$/\1:\2/")
+for line in $(egrep "Invalid user.+from" /var/log/secure/secure | egrep -o "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" | sort | uniq -c | sed "s/^[ ]*\([0-9]*\)[ ]*\(.*\)$/\1:\2/")
 do
   cnt=$(echo "$line" | awk 'BEGIN { FS = ":"}; { RS = "\n" }; { print $1 }')
   ip=$(echo "$line" | awk 'BEGIN { FS = ":"}; { RS = "\n" }; { print $2 }')
