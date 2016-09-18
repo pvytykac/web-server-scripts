@@ -33,10 +33,20 @@ function banIP {
   # otherwise add the rule and log the message
   else
     info "$IP: banning after $ATTEMPTS unsuccessfull login attempts"
-    firewall-cmd --permanent --add-rich-rule="$RULE" > /dev/null 2>&2
-    return $?
+    local resp=$(firewall-cmd --permanent --add-rich-rule="$RULE" 2>&1)
+    local status=$?
+
+    trace "attempt to ban '$ip' finished with status code '$status' and response '$resp'"
+    if [ "$status" -eq "0" ]; then
+      ((BANNED++))
+    fi
+
+    return "$status"
   fi
 }
+
+BANNED="0" # counter of banned ips
+RESULT="0" # exit code
 
 info  "starting"
 
@@ -61,9 +71,22 @@ do
   fi
 done
 
-# reload the firewalld for the changes to take effect
-info "finished the banning process and reloading the firewall"
-firewall-cmd --reload > /dev/null 2>&2
+# if needed reload the firewalld for the changes to take effect
+if [ "$BANNED" -gt "0" ]; then
+  info "$BANNED ips banned this run -> reloading the firewall service"
+  resp=$(firewall-cmd --reload 2>&1)
+  status=$?
+
+  trace "firewalld --reload call finished with status code '$status' and response '$resp'"
+  if [ "$status" -eq "0" ]; then
+    info "firewalld service was reloaded successfully"
+  else
+    error "firewalld service could not be reloaded"
+    RESULT="1"
+  fi
+else
+  info "no ips banned this run -> reload of firewall service is not needed"
+fi
 
 info "done"
-exit 0
+exit "$RESULT"
